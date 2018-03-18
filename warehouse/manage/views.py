@@ -38,11 +38,15 @@ from warehouse.email import (
     send_email_verification_email,
     send_password_change_email,
     send_primary_email_change_email,
+    send_removed_from_role_email,
     send_removed_project_email,
     send_removed_project_release_email,
     send_removed_project_release_file_email,
+    send_role_changed_for_user_email,
+    send_role_removed_from_user_email,
     send_two_factor_added_email,
     send_two_factor_removed_email,
+    send_user_role_changed_email,
 )
 from warehouse.i18n import localize as _
 from warehouse.macaroons.interfaces import IMacaroonService
@@ -1467,6 +1471,17 @@ def change_project_role(project, request, _form_class=ChangeRoleForm):
                             submitted_from=request.remote_addr,
                         )
                     )
+                    owners = (
+                        request.db.query(Role)
+                        .join(Role.user)
+                        .filter(
+                            Role.role_name == 'Owner',
+                            Role.project == role.project,
+                        )
+                    )
+                    owner_emails = [owner.user.email for owner in owners
+                                    if owner.user.email != role.user.email]
+
                     role.role_name = form.role_name.data
                     project.record_event(
                         tag="project:role:change",
@@ -1476,6 +1491,12 @@ def change_project_role(project, request, _form_class=ChangeRoleForm):
                             "role_name": form.role_name.data,
                             "target_user": role.user.username,
                         },
+                    )
+                    send_user_role_changed_email(request, role)
+                    send_role_changed_for_user_email(
+                        request,
+                        role,
+                        sorted(owner_emails),
                     )
                     request.session.flash("Changed role", queue="success")
             except NoResultFound:
@@ -1531,6 +1552,20 @@ def delete_project_role(project, request):
                     "role_name": role.role_name,
                     "target_user": role.user.username,
                 },
+            )
+            owners = (
+                request.db.query(Role)
+                .join(Role.user)
+                .filter(
+                    Role.role_name == 'Owner',
+                    Role.project == role.project,
+                )
+            )
+            owner_emails = [owner.user.email for owner in owners]
+
+            send_removed_from_role_email(request, role)
+            send_role_removed_from_user_email(
+                request, role, sorted(owner_emails)
             )
         request.session.flash("Removed role", queue="success")
 
