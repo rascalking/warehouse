@@ -1474,13 +1474,13 @@ def change_project_role(project, request, _form_class=ChangeRoleForm):
                     owners = (
                         request.db.query(Role)
                         .join(Role.user)
-                        .filter(
-                            Role.role_name == 'Owner',
-                            Role.project == role.project,
-                        )
+                        .filter(Role.role_name == "Owner", Role.project == role.project)
                     )
-                    owner_emails = [owner.user.email for owner in owners
-                                    if owner.user.email != role.user.email]
+                    owner_emails = [
+                        owner.user.email
+                        for owner in owners
+                        if owner.user.email != role.user.email
+                    ]
 
                     role.role_name = form.role_name.data
                     project.record_event(
@@ -1556,10 +1556,7 @@ def delete_project_role(project, request):
             owners = (
                 request.db.query(Role)
                 .join(Role.user)
-                .filter(
-                    Role.role_name == 'Owner',
-                    Role.project == role.project,
-                )
+                .filter(Role.role_name == "Owner", Role.project == role.project)
             )
             owner_emails = [owner.user.email for owner in owners]
 
