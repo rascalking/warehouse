@@ -1,9 +1,0 @@
-A collaborator's role has been changed in a project you own:
-
-  Username: {{ username }}
-  New role: {{ role }}
-  Collaborator for: {{ project }}
-  Changed by: {{ submitter }}
-
-If this was a mistake, you can email admin@mail.pypi.org to communicate with
-the PyPI administrators.

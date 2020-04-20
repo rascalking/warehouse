@@ -3210,12 +3210,12 @@ class TestManageProjectRoles:
             flash=pretend.call_recorder(lambda *a, **kw: None)
         )
 
-        send_collaborator_added_email = pretend.call_recorder(lambda *a: None)
+        send_collaborator_added_email = pretend.call_recorder(lambda *a, **kw: None)
         monkeypatch.setattr(
             views, "send_collaborator_added_email", send_collaborator_added_email
         )
 
-        send_added_as_collaborator_email = pretend.call_recorder(lambda *a: None)
+        send_added_as_collaborator_email = pretend.call_recorder(lambda *a, **kw: None)
         monkeypatch.setattr(
             views, "send_added_as_collaborator_email", send_added_as_collaborator_email
         )
@@ -3229,17 +3229,21 @@ class TestManageProjectRoles:
         assert send_collaborator_added_email.calls == [
             pretend.call(
                 db_request,
-                user,
-                db_request.user,
-                project.name,
-                form_obj.role_name.data,
                 {other_owner},
+                user=user,
+                submitter=db_request.user,
+                project_name=project.name,
+                role=form_obj.role_name.data,
             )
         ]
 
         assert send_added_as_collaborator_email.calls == [
             pretend.call(
-                db_request, db_request.user, project.name, form_obj.role_name.data, user
+                db_request,
+                user,
+                submitter=db_request.user,
+                project_name=project.name,
+                role=form_obj.role_name.data,
             )
         ]
 

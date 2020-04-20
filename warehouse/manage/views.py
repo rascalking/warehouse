@@ -1494,9 +1494,7 @@ def change_project_role(project, request, _form_class=ChangeRoleForm):
                     )
                     send_user_role_changed_email(request, role)
                     send_role_changed_for_user_email(
-                        request,
-                        role,
-                        sorted(owner_emails),
+                        request, role, sorted(owner_emails),
                     )
                     request.session.flash("Changed role", queue="success")
             except NoResultFound:
@@ -1561,9 +1559,7 @@ def delete_project_role(project, request):
             owner_emails = [owner.user.email for owner in owners]
 
             send_removed_from_role_email(request, role)
-            send_role_removed_from_user_email(
-                request, role, sorted(owner_emails)
-            )
+            send_role_removed_from_user_email(request, role, sorted(owner_emails))
         request.session.flash("Removed role", queue="success")
 
     return HTTPSeeOther(
